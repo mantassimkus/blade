@@ -1,0 +1,32 @@
+This file describes the implementation of the translation from guarded rules to plain datalog.
+
+=========Description of the Input=========================
+
+We split the input into rules that have and the rules that don't have existential variables. 
+The first are *existential rules* and the rest are *full* rules
+
+There are two rewriting rules: the first rule (F rule) generates full rules and the second  (E rule) 
+generates existential rules.
+
+==============Application of the F Rule===================
+Takes an existential rule and performs the projection operation. That is, from an existential rule
+we obtain a set of full rules
+
+==============Application of the E RUle===================
+Takes an existential rule and  a full rule. Generates a set of existential rules, where each
+results from a different way to collapse variables of the input existential rule and  the possible ways to
+ match the full rule into the existential rule.
+
+====================Data structures used============================= 
+We keep a set of existential rules and a set of full rules. We also have a job queue. There are two kinds
+ of jobs (f-jobs and e-jobs). f-jobs are just given by an existential rule, while an e-job is given by 
+ a pair of an existential and a universal rule.	
+ 
+ 
+ ============Insertion of a new rule ================
+ Suppose a f-job produces a set of full rules. The cartesian product of this set with all existential rules must be
+ added to the work queue. Suppose a e-job produces a set of existential rules. The cartesian product of this set 
+ with all universal  rules must be added to the work queue.     
+
+
+ 
