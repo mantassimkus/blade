@@ -2,12 +2,12 @@
 
 mkdir bin
 
-javac -verbose -d bin ./src/org/semanticweb/clipperrules/*.java
+javac -verbose -d bin ./src/org/semanticweb/blade/*.java
 
 cd ./bin
 
-jar -cvf clipper-rules.jar * 
+jar -cvf blade.jar *
 
-mv clipper-rules.jar ../
+mv blade.jar ../
 
 
