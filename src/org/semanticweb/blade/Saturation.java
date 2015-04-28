@@ -15,80 +15,69 @@ public class Saturation {
 	private List<ERule> eRules = new ArrayList<ERule>();
 
 	private List<ERule> fJobs = new ArrayList<ERule>();
-	private List<Pair<FRule,ERule>> eJobs = new ArrayList<Pair<FRule,ERule>>();
-	
-	
-		public boolean insertERule(ERule rule) {
+	private List<Pair<FRule, ERule>> eJobs = new ArrayList<Pair<FRule, ERule>>();
+
+	public boolean insertERule(ERule rule) {
 
 		if (!eRules.contains(rule)) {
 			eRules.add(rule);
 
 			fJobs.add(rule);
 
-			for (FRule full_rule : fRules) 
-				eJobs.add(new Pair<FRule,ERule>(full_rule,rule));
-								
+			for (FRule full_rule : fRules)
+				eJobs.add(new Pair<FRule, ERule>(full_rule, rule));
+
 			return true;
 		}
 
 		return false;
 	}
 
-	
-	
 	public boolean insertFRule(FRule rule) {
 
 		if (!fRules.contains(rule)) {
 			fRules.add(rule);
 
-			
-			for (ERule erule : this.eRules)
-			{
-				//System.out.println("Adding pair : " + erule.toString() +  " AND "+rule.toString());
-			   eJobs.add(new Pair<FRule,ERule>(rule,erule));
+			for (ERule erule : this.eRules) {
+				// System.out.println("Adding pair : " + erule.toString() +
+				// " AND "+rule.toString());
+				eJobs.add(new Pair<FRule, ERule>(rule, erule));
 			}
-			
+
 			return true;
 		}
 
 		return false;
 	}
 
-	
-	
-	
 	public void compute() throws SyntaxErrorException {
 
-		
-
-		while (!fJobs.isEmpty() || !eJobs.isEmpty() ) {
-
-			
+		while (!fJobs.isEmpty() || !eJobs.isEmpty()) {
 
 			if (!fJobs.isEmpty()) {
-				//System.out.println("applying full rule on " +fJobs.get(0));
-				
+				//System.out.println("applying full rule on " + fJobs.get(0));
+
 				FRule rule = this.applyFRule(fJobs.remove(0));
-				if (rule != null) 
-					this.insertFRule(rule); 
+				if (rule != null)
+					this.insertFRule(rule);
 
 			}
 
-			//System.out.println("Jobs left    : " +eJobs.size());
-			
-			if (!eJobs.isEmpty() ) {
-				
+			// System.out.println("Jobs left    : " +eJobs.size());
+
+			if (!eJobs.isEmpty()) {
+
 				FRule frule = eJobs.get(0).left;
 				ERule erule = eJobs.get(0).right;
 				eJobs.remove(0);
-				
-				// System.out.println("applying    : " +erule.toString()+ " on "+frule.toString());
-				for (ERule res : this.applyERule(erule, frule)) this.insertERule(res);
-				
-				}
-			}
 
-		
+			//System.out.println("applying    : " + erule.toString() + " on "
+				//		+ frule.toString());
+				for (ERule res : this.applyERule(erule, frule))
+					this.insertERule(res);
+
+			}
+		}
 
 	}
 
@@ -108,8 +97,8 @@ public class Saturation {
 				new_head, new_body);
 	}
 
-
-	private List<ERule> applyERule(ERule erule, FRule frule) throws SyntaxErrorException {
+	private List<ERule> applyERule(ERule erule, FRule frule)
+			throws SyntaxErrorException {
 
 		/*
 		 * We take the first guard in frule. We try to unify it with an atom in
@@ -123,8 +112,8 @@ public class Saturation {
 		List<ERule> ret = new ArrayList<ERule>();
 
 		for (int index = 0; index < erule.head.size(); index++)
-			if (erule.head.get(index).getPredicate() == frule.body.get(guard_pos)
-					.getPredicate()) {
+			if (erule.head.get(index).getPredicate() == frule.body.get(
+					guard_pos).getPredicate()) {
 
 				ERule new_erule = (ERule) erule.copyKeepTerms();
 				FRule new_frule = (FRule) frule.copyDualTerms();
@@ -142,40 +131,37 @@ public class Saturation {
 					if (t1 != t2 && !used.contains(t2)) {
 						// replace in new_frule t2 by t1
 
-						for (Atom at: new_frule.body)
+						for (Atom at : new_frule.body)
 							Collections.replaceAll(at.getTermList(), t2, t1);
-						for (Atom at: new_frule.head)
+						for (Atom at : new_frule.head)
 							Collections.replaceAll(at.getTermList(), t2, t1);
 
-						
 						used.add(t1);
 
 					}
 
 					if (t1 != t2 && used.contains(t2) && !used.contains(t1)) {
 						// replace in new_erule t1 by t2
-						
-						for (Atom at: new_erule.body)
-							Collections.replaceAll(at.getTermList(), t1, t2);
-						for (Atom at: new_erule.head)
-							Collections.replaceAll(at.getTermList(), t1, t2);
 
-						
+						for (Atom at : new_erule.body)
+							Collections.replaceAll(at.getTermList(), t1, t2);
+						for (Atom at : new_erule.head)
+							Collections.replaceAll(at.getTermList(), t1, t2);
 
 					}
 
 					if (t1 != t2 && used.contains(t2) && used.contains(t1)) {
 						// replace in both new_erule and new_frule t1 by t2
-						
-						for (Atom at: new_frule.body)
+
+						for (Atom at : new_frule.body)
 							Collections.replaceAll(at.getTermList(), t1, t2);
-						for (Atom at: new_frule.head)
-							Collections.replaceAll(at.getTermList(), t1, t2);						
-						for (Atom at: new_erule.body)
+						for (Atom at : new_frule.head)
 							Collections.replaceAll(at.getTermList(), t1, t2);
-						for (Atom at: new_erule.head)
+						for (Atom at : new_erule.body)
 							Collections.replaceAll(at.getTermList(), t1, t2);
-						
+						for (Atom at : new_erule.head)
+							Collections.replaceAll(at.getTermList(), t1, t2);
+
 					}
 
 				}
@@ -187,29 +173,28 @@ public class Saturation {
 					for (Atom addition : new_frule.head)
 						if (!new_erule.head.contains(addition))
 							new_erule.head.add(addition);
-					
 
 					boolean fail = false;
 
 					while (!new_frule.body.isEmpty() && !fail) {
 
-						Atom at = new_frule.body.get(0);
+						Atom at = new_frule.body.remove(0);
 
-						if (new_erule.head.contains(at)) {
-							new_frule.body.remove(0);
-						} else {
-							if (at.getEVars().isEmpty())
-								new_erule.body.add(at);
-							else
+						if (!new_erule.head.contains(at) ) {
+							if (at.getEVars().isEmpty()) {
+								if (!new_erule.body.contains(at) ) new_erule.body.add(at);
+							} else {
 								fail = true;
-
+							}
 						}
 
 					}
 
-					if (!fail)
-						ret.add((ERule) Rule.createFromAtomLists(new_erule.head, new_erule.body));
-
+					if (!fail) {
+						ret.add((ERule) Rule.createFromAtomLists(
+								new_erule.head, new_erule.body));
+					//	System.out.println(ret.size());
+					}
 				}
 
 			}
@@ -217,23 +202,23 @@ public class Saturation {
 		return ret;
 	}
 
-	static Program rewrite (Program input) throws SyntaxErrorException {
-		
+	static Program rewrite(Program input) throws SyntaxErrorException {
+
 		Saturation rewriter = new Saturation();
-		for (Rule rule: input.rules) 
-			if (rule instanceof ERule)
-				{rewriter.insertERule((ERule) rule);} else
-				{rewriter.insertFRule((FRule) rule);}
-		
-		
-		
+		for (Rule rule : input.rules)
+			if (rule instanceof ERule) {
+				rewriter.insertERule((ERule) rule);
+			} else {
+				rewriter.insertFRule((FRule) rule);
+			}
+
 		rewriter.compute();
-		
+
 		Program ret = new Program();
-		//ret.rules.addAll(rewriter.eRules);
+	    ret.rules.addAll(rewriter.eRules);
 		ret.rules.addAll(rewriter.fRules);
 		return ret;
-		
+
 	}
-	
+
 }
