@@ -55,10 +55,9 @@ public class Saturation {
 		while (!fJobs.isEmpty() || !eJobs.isEmpty()) {
 
 			if (!fJobs.isEmpty()) {
-				//System.out.println("applying full rule on " + fJobs.get(0));
+				// System.out.println("applying full rule on " + fJobs.get(0));
 
-				FRule rule = this.applyFRule(fJobs.remove(0));
-				if (rule != null)
+				for (FRule rule : this.applyFRule(fJobs.remove(0)))
 					this.insertFRule(rule);
 
 			}
@@ -71,8 +70,9 @@ public class Saturation {
 				ERule erule = eJobs.get(0).right;
 				eJobs.remove(0);
 
-			//System.out.println("applying    : " + erule.toString() + " on "
-				//		+ frule.toString());
+				// System.out.println("applying    : " + erule.toString() +
+				// " on "
+				// + frule.toString());
 				for (ERule res : this.applyERule(erule, frule))
 					this.insertERule(res);
 
@@ -81,7 +81,7 @@ public class Saturation {
 
 	}
 
-	private FRule applyFRule(ERule erule) throws SyntaxErrorException {
+	private FRule OLDapplyFRule(ERule erule) throws SyntaxErrorException {
 
 		List<Atom> new_head = new ArrayList<Atom>();
 		List<Atom> new_body = new ArrayList<Atom>();
@@ -95,6 +95,23 @@ public class Saturation {
 
 		return new_head.isEmpty() ? null : (FRule) Rule.createFromAtomLists(
 				new_head, new_body);
+	}
+
+	private List<FRule> applyFRule(ERule erule) throws SyntaxErrorException {
+
+		List<FRule> ret = new ArrayList<FRule>();
+		List<Atom> new_body = new ArrayList<Atom>(erule.body);
+
+		for (Atom atom : erule.head) {
+			if (atom.getEVars().isEmpty()) {
+				List<Atom> new_head = new ArrayList<Atom>();
+				new_head.add(atom);
+				ret.add((FRule) Rule.createFromAtomLists(new_head, new_body));
+
+			}
+		}
+
+		return ret;
 	}
 
 	private List<ERule> applyERule(ERule erule, FRule frule)
@@ -180,9 +197,10 @@ public class Saturation {
 
 						Atom at = new_frule.body.remove(0);
 
-						if (!new_erule.head.contains(at) ) {
+						if (!new_erule.head.contains(at)) {
 							if (at.getEVars().isEmpty()) {
-								if (!new_erule.body.contains(at) ) new_erule.body.add(at);
+								if (!new_erule.body.contains(at))
+									new_erule.body.add(at);
 							} else {
 								fail = true;
 							}
@@ -193,7 +211,7 @@ public class Saturation {
 					if (!fail) {
 						ret.add((ERule) Rule.createFromAtomLists(
 								new_erule.head, new_erule.body));
-					//	System.out.println(ret.size());
+						// System.out.println(ret.size());
 					}
 				}
 
@@ -202,9 +220,10 @@ public class Saturation {
 		return ret;
 	}
 
-	static Program rewrite(Program input) throws SyntaxErrorException {
+	static Saturation saturate(Program input) throws SyntaxErrorException {
 
 		Saturation rewriter = new Saturation();
+
 		for (Rule rule : input.rules)
 			if (rule instanceof ERule) {
 				rewriter.insertERule((ERule) rule);
@@ -214,9 +233,35 @@ public class Saturation {
 
 		rewriter.compute();
 
+		return rewriter;
+
+	}
+
+	static Program toSaturatedProgram(Program input)
+			throws SyntaxErrorException {
+
+		Saturation sat = Saturation.saturate(input);
+
 		Program ret = new Program();
-	    ret.rules.addAll(rewriter.eRules);
-		ret.rules.addAll(rewriter.fRules);
+
+		ret.rules.addAll(sat.eRules);
+
+		ret.rules.addAll(sat.fRules);
+
+		return ret;
+
+	}
+
+	static Program toDatalog(Program input) throws SyntaxErrorException {
+
+		Saturation sat = Saturation.saturate(input);
+
+		Program ret = new Program();
+
+		// ret.rules.addAll(sat.eRules);
+
+		ret.rules.addAll(sat.fRules);
+
 		return ret;
 
 	}
