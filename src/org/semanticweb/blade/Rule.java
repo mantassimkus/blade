@@ -253,8 +253,11 @@ public class Rule {
 
 		Rule rule = (Rule) obj;
 
-		return this.head.equals(rule.head) && this.body.equals(rule.body);
-
+		// return this.head.equals(rule.head) && this.body.equals(rule.body);
+		
+		return this.head.containsAll(rule.head) && rule.head.containsAll(this.head) && this.body.containsAll(rule.body) && rule.body.containsAll(this.body); 
+ 
+				
 	}
 	
 	
